@@ -1,3 +1,38 @@
+type Block = record {
+  baseFeePerGas : nat;
+  difficulty : nat;
+  extraData : text;
+  gasLimit : nat;
+  gasUsed : nat;
+  hash : text;
+  logsBloom : text;
+  miner : text;
+  mixHash : text;
+  nonce : nat;
+  number : nat;
+  parentHash : text;
+  receiptsRoot : text;
+  sha3Uncles : text;
+  size : nat;
+  stateRoot : text;
+  timestamp : nat;
+  totalDifficulty : nat;
+  transactions : vec text;
+  transactionsRoot : opt text;
+  uncles : vec text;
+};
+
+type EcdsaPublicKeyResponse = record {
+  public_key : blob;
+  chain_code : blob;
+};
+
+type SignWithEcdsaResponse = record {
+  signature : blob;
+};
+
 service : {
-    "greet": (text) -> (text) query;
-}
+  get_latest_ethereum_block : () -> (Block);
+  get_ecdsa_public_key : () -> (EcdsaPublicKeyResponse);
+  sign_hash_with_ecdsa : (blob) -> (SignWithEcdsaResponse);
+};

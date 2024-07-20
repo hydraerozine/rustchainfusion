@@ -1,5 +1,3 @@
 [workspace]
-members = [
-    "src/ninarust_backend"
-]
+members = ["src/ninarust_backend"]
 resolver = "2"
