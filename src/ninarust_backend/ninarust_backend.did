@@ -31,8 +31,13 @@ type SignWithEcdsaResponse = record {
   signature : blob;
 };
 
+type EthereumAddress = record {
+  address : text;
+};
+
 service : {
   get_latest_ethereum_block : () -> (Block);
   get_ecdsa_public_key : () -> (EcdsaPublicKeyResponse);
   sign_hash_with_ecdsa : (blob) -> (SignWithEcdsaResponse);
+  get_ethereum_address : () -> (EthereumAddress);
 };
