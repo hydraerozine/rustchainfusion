@@ -1,0 +1,17 @@
+{
+  "canisters": {
+    "ninarust_backend": {
+      "candid": "src/ninarust_backend/ninarust_backend.did",
+      "package": "ninarust_backend",
+      "type": "rust"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
