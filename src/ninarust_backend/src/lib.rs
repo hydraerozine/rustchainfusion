@@ -5,6 +5,8 @@ use ic_cdk::api::management_canister::ecdsa::{
 };
 use ic_cdk_macros::update;
 use sha3::{Digest, Keccak256};
+use ethabi::{Token, Function, Param, ParamType};
+use hex;
 
 mod evm_rpc;
 use evm_rpc::{
@@ -15,6 +17,12 @@ use evm_rpc::{
 #[derive(CandidType, Deserialize)]
 struct EthereumAddress {
     address: String,
+}
+
+#[derive(CandidType, Deserialize)]
+struct TransferRequest {
+    to: String,
+    amount: String,
 }
 
 #[update]
@@ -85,10 +93,44 @@ async fn get_ethereum_address() -> EthereumAddress {
     }
 }
 
+#[update]
+async fn transfer_bsc_testnet_token(request: TransferRequest) -> String {
+    let from_address = get_ethereum_address().await.address;
+    let to_address = request.to;
+    let amount = u128::from_str_radix(&request.amount, 10).expect("Invalid amount");
+
+    // BSC Testnet Chain ID
+    let chain_id = 97;
+
+    // Token contract address on BSC Testnet
+    let token_address = "0x93C31Cc3fF99265B744CE64D76313eDF2A76D3E5";
+
+    // Create the transaction data for a token transfer
+    let data = create_erc20_transfer_data(&to_address, amount);
+
+    // Get the nonce for the from_address
+    let nonce = get_nonce(&from_address).await;
+
+    // Create and sign the transaction
+    let signed_tx = create_and_sign_transaction(
+        from_address,
+        token_address.to_string(),
+        0, // value is 0 for token transfers
+        data,
+        chain_id,
+        nonce,
+    ).await;
+
+    // Send the signed transaction
+    let tx_hash = send_raw_transaction(signed_tx).await;
+
+    format!("Transaction sent. Hash: {}", tx_hash)
+}
+
 fn key_id() -> EcdsaKeyId {
     EcdsaKeyId {
         curve: EcdsaCurve::Secp256k1,
-        name: "dfx_test_key".to_string(), // use "key_1" for mainnet
+        name: "key_1".to_string(), // use "key_1" for mainnet
     }
 }
 
@@ -106,4 +148,50 @@ fn public_key_to_ethereum_address(public_key: &[u8]) -> [u8; 20] {
     address.copy_from_slice(&result[12..]);
     
     address
+}
+
+fn create_erc20_transfer_data(to: &str, amount: u128) -> Vec<u8> {
+    let function = Function {
+        name: "transfer".to_string(),
+        inputs: vec![
+            Param { name: "to".to_string(), kind: ParamType::Address, internal_type: None },
+            Param { name: "amount".to_string(), kind: ParamType::Uint(256), internal_type: None },
+        ],
+        outputs: vec![],
+        constant: None,
+        state_mutability: ethabi::StateMutability::NonPayable,
+    };
+
+    let to_address = ethabi::Address::from_slice(&hex::decode(to).unwrap());
+    let params = vec![
+        Token::Address(to_address),
+        Token::Uint(amount.into()),
+    ];
+
+    function.encode_input(&params).unwrap()
+}
+
+async fn get_nonce(_address: &str) -> u64 {
+    // Implement this function to get the nonce from the BSC testnet
+    // Need to make an RPC call to the BSC testnet
+    unimplemented!()
+}
+
+async fn create_and_sign_transaction(
+    _from: String,
+    _to: String,
+    _value: u64,
+    _data: Vec<u8>,
+    _chain_id: u64,
+    _nonce: u64,
+) -> Vec<u8> {
+    // Implement this function to create and sign the transaction
+    // Need to use the ECDSA API to sign the transaction
+    unimplemented!()
+}
+
+async fn send_raw_transaction(_signed_tx: Vec<u8>) -> String {
+    // Implement this function to send the raw transaction to the BSC testnet
+    // Need to make an RPC call to the BSC testnet
+    unimplemented!()
 }

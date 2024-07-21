@@ -35,9 +35,15 @@ type EthereumAddress = record {
   address : text;
 };
 
+type TransferRequest = record {
+  to : text;
+  amount : text;
+};
+
 service : {
   get_latest_ethereum_block : () -> (Block);
   get_ecdsa_public_key : () -> (EcdsaPublicKeyResponse);
   sign_hash_with_ecdsa : (blob) -> (SignWithEcdsaResponse);
   get_ethereum_address : () -> (EthereumAddress);
+  transfer_bsc_testnet_token : (TransferRequest) -> (text);
 };
